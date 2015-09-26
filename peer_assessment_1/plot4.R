@@ -1,0 +1,57 @@
+#######
+# 
+#  Dataset : Electric power consumption
+#  Source : UC Irvine Machine Learning Repository
+#  URL : https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2Fhousehold_power_consumption.zip
+#
+#  Energy consumption overview from the dates 2007-02-01 and 2007-02-02
+#
+#######
+
+## Reset the graphical parameters back to default values
+old.par <- par(mar = c(0, 0, 0, 0))
+par(old.par)
+
+## Getting full dataset
+data_full <- read.csv("./Data/household_power_consumption.txt", header=T, sep=';', na.strings="?", 
+                      nrows=2075259, check.names=F, stringsAsFactors=F, comment.char="", quote='\"')
+
+## Take in charge the date format 
+data_full$Date <- as.Date(data_full$Date, format="%d/%m/%Y")
+
+## Subsetting the data
+data <- subset(data_full, subset=(Date >= "2007-02-01" & Date <= "2007-02-02"))
+rm(data_full)
+
+## Concatenate date end time such as : "2007-02-01 00:00:00"
+datetime <- paste(data$Date, data$Time)
+
+## Convert our string's array into array of objects representing the date and time
+data$Datetime <- as.POSIXct(datetime)
+
+## Build and display 4 graphs (Plot 4)
+# - Global Active Power (kilowatts)
+# - Voltage (volt)
+# - Global Active Power (kilowatts)
+# - Global Reactive Power (kilowatts)
+par(mfrow=c(2,2), mar=c(4,4,2,1), oma=c(0,0,2,0))
+with(data, {
+  plot(Global_active_power~Datetime, type="l", 
+       ylab="Global Active Power (kilowatts)", xlab="")
+  plot(Voltage~Datetime, type="l", 
+       ylab="Voltage (volt)", xlab="")
+  plot(Sub_metering_1~Datetime, type="l", 
+       ylab="Global Active Power (kilowatts)", xlab="")
+  lines(Sub_metering_2~Datetime,col='Red')
+  lines(Sub_metering_3~Datetime,col='Blue')
+  legend("topright", col=c("black", "red", "blue"), lty=1, lwd=2, bty="n",
+         legend=c("Sub_metering_1", "Sub_metering_2", "Sub_metering_3"), cex = 0.55)
+  plot(Global_reactive_power~Datetime, type="l", 
+       ylab="Global Reactive Power (kilowatts)",xlab="")
+})
+
+## Edit the PNG file
+dev.copy(png, file="plot4.png", height=480, width=480)
+
+## Close the file
+dev.off()
